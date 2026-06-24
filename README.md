@@ -26,15 +26,26 @@ source .venv/bin/activate
 pip install --upgrade pip
 pip install -r requirements.txt
 
-# 3. Start the backend server (runs on http://127.0.0.1:8000)
+# 3. Start the backend server (default: http://localhost:8000)
 python backend.py
 
 # 4. Serve the frontend (or open index.html directly)
 # Option A - serve static files (recommended):
 python -m http.server 8080
-# then open http://127.0.0.1:8080/index.html
+# then open http://localhost:8080/index.html
 
 # Option B - open the file directly in your browser (file://...)
+```
+
+Environment Variables (Optional)
+
+Configure the application using environment variables:
+
+```bash
+# Backend configuration
+export HOST=localhost          # Default: localhost
+export PORT=8000               # Default: 8000
+export ALLOWED_ORIGINS=http://localhost:8080,https://yourdomain.com  # Comma-separated list
 ```
 
 API
@@ -45,9 +56,10 @@ API
 
 Notes and recommendations
 
-- CORS is configured to allow all origins in this example for simplicity. Lock this down for production.
+- CORS is configured to allow specified origins. Update `ALLOWED_ORIGINS` environment variable for production.
 - The `MOCK_CORPUS` is an in-memory list used for demonstration. Replace with a real document store or vector DB for production use.
 - Consider containerizing this service with Docker for easier deployment.
+- Never commit sensitive configuration (API keys, personal URLs, etc.) to version control.
 
 License
 
