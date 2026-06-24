@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>API Connection Example</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        max-width: 600px;
+        margin: 40px auto;
+        padding: 20px;
+      }
+      .search-box {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+      }
+      input {
+        flex: 1;
+        padding: 10px;
+        font-size: 16px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+      button {
+        padding: 10px 20px;
+        font-size: 16px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      button:hover {
+        background-color: #0056b3;
+      }
+      .result-card {
+        border: 1px solid #eee;
+        padding: 15px;
+        margin-bottom: 10px;
+        border-radius: 4px;
+        background-color: #f9f9f9;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Document Retrieval UI</h2>
+
+    <div class="search-box">
+      <input
+        type="text"
+        id="searchInput"
+        placeholder="Search for 'agent', 'AWS', or 'RAG'..."
+      />
+      <button onclick="searchAPI()">Search</button>
+    </div>
+
+    <div id="resultsContainer"></div>
+
+    <script>
+      async function searchAPI() {
+        const queryText = document.getElementById("searchInput").value;
+        const container = document.getElementById("resultsContainer");
+
+        // Show loading state
+        container.innerHTML = "<p>Loading...</p>";
+
+        try {
+          // 1. Connect to the Python API using fetch()
+          const response = await fetch("http://127.0.0.1:8000/api/search", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json", // Telling the backend we are sending JSON
+            },
+            body: JSON.stringify({ query: queryText }), // The payload matching the Pydantic BaseModel
+          });
+
+          // 2. Parse the JSON response from Python
+          const data = await response.json();
+
+          // 3. Render the data to the UI
+          if (data.match_count === 0) {
+            container.innerHTML = `<p>No results found for "${data.query_received}".</p>`;
+            return;
+          }
+
+          container.innerHTML = `<h3>Found ${data.match_count} result(s):</h3>`;
+
+          data.data.forEach((item) => {
+            const div = document.createElement("div");
+            div.className = "result-card";
+            div.innerHTML = `<strong>${item.title}</strong><br><small>${item.content}</small>`;
+            container.appendChild(div);
+          });
+        } catch (error) {
+          console.error("Error connecting to API:", error);
+          container.innerHTML = `<p style="color: red;">Failed to connect to the backend API. Is Python running?</p>`;
+        }
+      }
+    </script>
+  </body>
+</html>
