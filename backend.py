@@ -1,3 +1,4 @@
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -6,9 +7,12 @@ from pydantic import BaseModel
 app = FastAPI(title="Simple Retrieval API")
 
 # Configure CORS so the frontend can call this API from a different origin
+# In production, specify your frontend's actual domain
+allowed_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:8080").split(",")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, set this to your frontend's origin
+    allow_origins=allowed_origins,  # Specify your frontend's origin in production
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -53,4 +57,7 @@ if __name__ == "__main__":
     # Allows starting the server with `python backend.py`
     import uvicorn
 
-    uvicorn.run(app, host="127.0.0.1", port=8000, reload=True)
+    host = os.getenv("HOST", "localhost")
+    port = int(os.getenv("PORT", 8000))
+    
+    uvicorn.run(app, host=host, port=port, reload=True)
